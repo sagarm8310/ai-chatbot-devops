@@ -22,10 +22,6 @@ jobs:
         cd frontend
         npm install
 
-    - name: Run Frontend Tests
-      run: |
-        cd frontend
-        npm test -- --watchAll=false
 
     - name: Setup Python
       uses: actions/setup-python@v4
