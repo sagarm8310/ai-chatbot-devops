@@ -9,21 +9,57 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 
 @app.route('/')
 def home():
     return "AI Backend is running!"
 
+# 🔥 Weather function
+def get_weather(city):
+    try:
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code != 200:
+            return "Unable to fetch weather."
+
+        temp = data["main"]["temp"]
+        desc = data["weather"][0]["description"]
+
+        return f"The weather in {city} is {desc} with temperature {temp}°C."
+
+    except Exception as e:
+        print("Weather Error:", e)
+        return "Error fetching weather data."
+
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get("message")
 
+    # 🔥 Weather detection (NEW)
+    if "weather" in user_message.lower():
+        try:
+            # extract city (simple logic)
+            if "in" in user_message.lower():
+                city = user_message.lower().split("in")[-1].strip()
+            else:
+                city = "Bangalore"  # default
+
+            weather_reply = get_weather(city)
+            return jsonify({"reply": weather_reply})
+
+        except Exception as e:
+            print("Weather Route Error:", e)
+
+    # 🔥 OpenRouter (existing logic)
     try:
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {API_KEY}",
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
