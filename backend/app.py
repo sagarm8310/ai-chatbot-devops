@@ -60,19 +60,19 @@ def get_cricket():
         print("Cricket Error:", e)
         return "❌ Error fetching cricket data."
 
-# 📰 NEWS FUNCTION
-def get_news():
+# 📰 NEWS FUNCTION (UPDATED 🔥)
+def get_news(query="india"):
     try:
-        url = f"https://newsapi.org/v2/top-headlines?country=in&apiKey={NEWS_API_KEY}"
+        url = f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&apiKey={NEWS_API_KEY}"
         res = requests.get(url)
         data = res.json()
 
         articles = data.get("articles", [])[:3]
 
         if not articles:
-            return "📰 No news available."
+            return f"📰 No news found for '{query}'."
 
-        reply = "📰 Top News:\n\n"
+        reply = f"📰 Top News about {query}:\n\n"
         for art in articles:
             reply += f"• {art['title']}\n"
 
@@ -102,9 +102,15 @@ def chat():
     elif any(word in msg for word in ["live score", "current match", "live cricket", "score update"]):
         return jsonify({"reply": get_cricket()})
 
-    # 📰 NEWS
-    elif any(word in msg for word in ["news", "headlines", "latest news"]):
-        return jsonify({"reply": get_news()})
+    # 📰 NEWS (UPDATED 🔥)
+    elif "news" in msg:
+        # extract topic
+        query = msg.replace("latest", "").replace("news", "").strip()
+
+        if query:
+            return jsonify({"reply": get_news(query)})
+        else:
+            return jsonify({"reply": get_news("india")})
 
     # 🤖 AI FALLBACK (OpenRouter)
     try:
