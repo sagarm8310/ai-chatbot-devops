@@ -32,7 +32,8 @@ def get_weather(city):
 
         if res.status_code != 200:
             return f"❌ City '{city}' not found."
-
+        
+        #Extract Data
         temp = data["main"]["temp"]
         desc = data["weather"][0]["description"]
 
@@ -76,7 +77,7 @@ def get_news(query="india"):
 
         res = requests.get(url)
         data = res.json()
-
+        #Gets top 3 news articles.
         articles = data.get("articles", [])[:3]
 
         if not articles:
@@ -97,11 +98,12 @@ def get_news(query="india"):
 # 🤖 MAIN CHAT ROUTE
 @app.route('/chat', methods=['POST'])
 def chat():
-
+    #Receive User Message
     user_message = request.json.get("message")
     msg = user_message.lower()
 
     # 🌦 WEATHER
+    #Checks whether user asked weather-related query.
     if any(word in msg for word in ["weather", "temperature", "climate"]):
 
         # Split message into words
@@ -132,11 +134,13 @@ def chat():
         return jsonify({"reply": get_weather(city)})
 
     # 🏏 CRICKET
+    #Detects cricket-related queries.
     elif any(word in msg for word in ["live score", "current match", "live cricket", "score update"]):
 
         return jsonify({"reply": get_cricket()})
 
     # 📰 NEWS
+    #Detects news-related queries.
     elif "news" in msg:
 
         query = (
@@ -152,6 +156,7 @@ def chat():
             return jsonify({"reply": get_news("india")})
 
     # 🤖 AI FALLBACK
+    #if the query is not related to weather, cricket, or news, it will be sent to the AI model for a response.
     try:
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -186,7 +191,7 @@ def chat():
 
     return jsonify({"reply": reply})
 
-
+#Runs Flask application.
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
 
