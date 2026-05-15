@@ -87,7 +87,7 @@ function App() {
       <div className="chat-container">
 
         <div className="header">
-          Ai chatbot🖲️🖲️
+          AI Chatbot DevOps 🚀
 
           <div className="header-buttons">
             <button onClick={() => setDarkMode(!darkMode)}>
